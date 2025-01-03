@@ -1,0 +1,14 @@
+[package]
+name = "asciirc"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1", features = [
+  "io-util",
+  "macros",
+  "net",
+  "rt-multi-thread",
+  "time",
+] }
+clap = { version = "4", features = ["derive"] }
