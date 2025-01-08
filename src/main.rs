@@ -1,3 +1,5 @@
+#![feature(let_chains)]
+
 mod arguments;
 mod irc;
 
@@ -18,7 +20,8 @@ async fn main() {
         client.join_channel(&args.channel).await.unwrap();
         clients.push(client);
     }
-    println!("ready! listening for messages...");
+    let client_count = clients.len();
+    println!("ready with {client_count} clients! listening for messages...");
 
     loop {
         clients[0].sync(Some(irc::Event::PrivMsg)).await.unwrap();
@@ -35,7 +38,9 @@ async fn main() {
         let mut last_line = None;
         for line_chunk in art.lines().collect::<Vec<_>>().chunks(args.clients) {
             for (line, client) in line_chunk.iter().zip(&mut clients) {
-                if let Some(&last_line) = last_line {
+                if client_count > 1
+                    && let Some(&last_line) = last_line
+                {
                     'outer: loop {
                         if let Err(irc::Error::Timeout) = client
                             .sync_with_timeout(
@@ -47,6 +52,7 @@ async fn main() {
                             eprintln!("timed out waiting for previous line to be received");
                             break 'outer;
                         }
+
                         while let Some(privmsg) = client.privmsgs.pop() {
                             if privmsg.content == last_line {
                                 break 'outer;
