@@ -27,10 +27,10 @@ async fn main() {
             continue;
         }
 
-        let Ok(art) = std::fs::read_to_string(privmsg.content) else {
+        let Ok(art) = std::fs::read_to_string(&privmsg.content) else {
             continue;
         };
-        println!("sending {art}...");
+        println!("sending {}...", privmsg.content);
 
         let mut last_line = None;
         for line_chunk in art.lines().collect::<Vec<_>>().chunks(args.clients) {
