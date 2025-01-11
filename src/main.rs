@@ -42,6 +42,12 @@ async fn main() {
                     && let Some(&last_line) = last_line
                 {
                     'outer: loop {
+                        while let Some(privmsg) = client.privmsgs.pop() {
+                            if privmsg.content == last_line {
+                                break 'outer;
+                            }
+                        }
+
                         if let Err(irc::Error::Timeout) = client
                             .sync_with_timeout(
                                 Some(irc::Event::PrivMsg),
@@ -52,12 +58,6 @@ async fn main() {
                             eprintln!("timed out waiting for previous line to be received");
                             break 'outer;
                         }
-
-                        while let Some(privmsg) = client.privmsgs.pop() {
-                            if privmsg.content == last_line {
-                                break 'outer;
-                            }
-                        }
                     }
                 }
 
@@ -65,7 +65,7 @@ async fn main() {
                     .send_message(if line.is_empty() { " " } else { line })
                     .await
                     .unwrap();
-                last_line = Some(line);
+                last_line = if line.is_empty() { None } else { Some(line) };
             }
         }
     }
