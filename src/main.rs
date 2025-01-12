@@ -23,6 +23,7 @@ async fn main() {
     let client_count = clients.len();
     println!("ready with {client_count} clients! listening for messages...");
 
+    let mut last_file = None;
     for i in 0.. {
         let privmsg = if (clients[i % client_count]
             .sync_with_timeout(Some(irc::Event::PrivMsg), Duration::from_secs(10))
@@ -36,11 +37,17 @@ async fn main() {
         if !args.owners.contains(&privmsg.source) {
             continue;
         }
+        if let Some(ref last) = last_file
+            && privmsg.content == *last
+        {
+            continue;
+        }
 
         let Ok(art) = std::fs::read_to_string(&privmsg.content) else {
             continue;
         };
-        println!("sending {}...", privmsg.content);
+        println!("sending {}...", &privmsg.content);
+        last_file = Some(privmsg.content);
 
         let mut last_line = None;
         for line_chunk in art.lines().collect::<Vec<_>>().chunks(args.clients) {
