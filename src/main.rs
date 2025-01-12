@@ -23,9 +23,16 @@ async fn main() {
     let client_count = clients.len();
     println!("ready with {client_count} clients! listening for messages...");
 
-    loop {
-        clients[0].sync(Some(irc::Event::PrivMsg)).await.unwrap();
-        let privmsg = clients[0].privmsgs.pop().unwrap();
+    for i in 0.. {
+        let privmsg = if (clients[i % client_count]
+            .sync_with_timeout(Some(irc::Event::PrivMsg), Duration::from_secs(10))
+            .await)
+            .is_ok()
+        {
+            clients[i % client_count].privmsgs.pop().unwrap()
+        } else {
+            continue;
+        };
         if !args.owners.contains(&privmsg.source) {
             continue;
         }
