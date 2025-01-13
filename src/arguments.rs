@@ -1,6 +1,6 @@
 use clap::Parser;
 
-/// Send ASCII art on IRC using multiple bots
+/// Send ASCII art on IRC using multiple clients
 #[derive(Parser)]
 #[command(about, version)]
 pub struct Arguments {
@@ -12,7 +12,7 @@ pub struct Arguments {
     #[arg(short, long)]
     pub nickname: String,
 
-    /// IRC channel to use
+    /// IRC channel to join
     #[arg(short = 'C', long)]
     pub channel: String,
 
